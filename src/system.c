@@ -1,5 +1,4 @@
 #include "system.h"
-
 #include <petscdm.h>
 #include <petscdmda.h>
 #include <petscdmdatypes.h>
@@ -12,9 +11,7 @@
 #include <petscvec.h>
 #include <petscviewer.h>
 
-
-
-PetscErrorCode formkappa(DM dm, Vec x, PetscInt penal) {
+PetscErrorCode formkappa(DM dm, Vec x) {
   PetscFunctionBeginUser;
   PetscInt startx, starty, startz, nx, ny, nz, ex, ey, ez, i;
   PetscScalar ***arrayx, ***arraykappa[DIM];
@@ -29,7 +26,7 @@ PetscErrorCode formkappa(DM dm, Vec x, PetscInt penal) {
       for (ex = startx; ex < startx + nx; ++ex) {
         for (i = 0; i < DIM; ++i) {
           arraykappa[i][ez][ey][ex] =
-              (kH - kL) * PetscPowScalar(arrayx[ez][ey][ex], penal) + kL;
+              (kH - kL) * PetscPowScalar(arrayx[ez][ey][ex], 3) + kL;
         }
       }
     }
@@ -43,6 +40,7 @@ PetscErrorCode formkappa(DM dm, Vec x, PetscInt penal) {
 }
 
 PetscErrorCode formMatrix(PCCtx *s_ctx, Mat A) {
+
   PetscFunctionBeginUser;
 
   Vec kappa_loc[DIM]; // Destroy later.
@@ -56,7 +54,6 @@ PetscErrorCode formMatrix(PCCtx *s_ctx, Mat A) {
                               kappa_loc[i]));
     PetscCall(DMDAVecGetArrayRead(s_ctx->dm, kappa_loc[i], &arr_kappa_3d[i]));
   }
-  PetscCall(DMDAVecGetArrayRead(s_ctx->dm, s_ctx->boundary, &arrayBoundary));
 
   PetscCall(
       DMDAGetCorners(s_ctx->dm, &startx, &starty, &startz, &nx, &ny, &nz));
@@ -124,8 +121,7 @@ PetscErrorCode formMatrix(PCCtx *s_ctx, Mat A) {
     PetscCall(DMRestoreLocalVector(s_ctx->dm, &kappa_loc[i]));
     PetscCall(VecDestroy(&kappa_loc[i]));
   }
-  PetscCall(
-      DMDAVecRestoreArrayRead(s_ctx->dm, s_ctx->boundary, &arrayBoundary));
+
   PetscFunctionReturn(0);
 }
 
@@ -162,3 +158,4 @@ PetscErrorCode formRHS(PCCtx *s_ctx, Vec rhs, Vec x, PetscInt penal) {
 
   PetscFunctionReturn(0);
 }
+

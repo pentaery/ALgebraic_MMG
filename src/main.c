@@ -18,10 +18,7 @@
 #include <stdio.h>
 
 int main(int argc, char **argv) {
-  PetscCall(
-      SlepcInitialize(&argc, &argv, (char *)0, "MMG\n"));
-  
-  
-
+  PetscCall(SlepcInitialize(&argc, &argv, (char *)0, "MMG\n"));
+  PetscPrintf(PETSC_COMM_WORLD, "SLEPc initialized\n");
   PetscCall(SlepcFinalize());
 }

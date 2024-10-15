@@ -12,16 +12,12 @@
 #include <petscviewer.h>
 
 #define tD 100.0
-#define xCont 1e-6
-#define volfrac 0.1
 #define f0 1
-#define DIM 3
 
 #define kH 1
-#define kL 1e-3
-#define xlow 0
+#define kL 1e-6
+#define DIM 3
 
-PetscErrorCode formkappa(PCCtx *s_ctx, Vec x, PetscInt penal);
+PetscErrorCode formkappa(PCCtx *s_ctx, Vec x);
 PetscErrorCode formMatrix(PCCtx *s_ctx, Mat A);
 PetscErrorCode formRHS(PCCtx *s_ctx, Vec rhs, Vec x, PetscInt penal);
-
