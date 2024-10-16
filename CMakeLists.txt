@@ -52,6 +52,7 @@ endif (CXX_FLAGS)
 project(PreMixFEM)
 set(SOURCES 
  src/main.c
+ src/system.c
 )
 SET(OUTPUT_NAME test)
 add_executable(${OUTPUT_NAME} ${SOURCES})
