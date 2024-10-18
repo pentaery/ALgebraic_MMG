@@ -67,7 +67,7 @@ PetscErrorCode formkappa(PCCtx *s_ctx) {
 
 PetscErrorCode formMatrix(PCCtx *s_ctx, Mat A) {
   PetscFunctionBeginUser;
-
+  PetscCall(formkappa(s_ctx));
   Vec kappa_loc[DIM];  // Destroy later.
   PetscInt startx, starty, startz, nx, ny, nz, ex, ey, ez, i;
   PetscScalar ***arr_kappa_3d[DIM], ***arrayBoundary, val_A[2][2], avg_kappa_e;
@@ -169,8 +169,9 @@ PetscErrorCode formRHS(PCCtx *s_ctx, Vec rhs) {
       for (ex = startx; ex < startx + nx; ex++) {
         array[ez][ey][ex] += s_ctx->H_x * s_ctx->H_y * s_ctx->H_z * f0;
         if (arrayBoundary[ez][ey][ex] > 0.5) {
-          array[ez][ey][ex] += 2 * arraykappa[ez][ey][ex] * tD * s_ctx->H_x *
-                               s_ctx->H_y / s_ctx->H_z;
+          // array[ez][ey][ex] += 2 * arraykappa[ez][ey][ex] * tD * s_ctx->H_x *
+          //                      s_ctx->H_y / s_ctx->H_z;
+          array[ez][ey][ex] = 0;
         }
       }
     }
@@ -184,13 +185,12 @@ PetscErrorCode formRHS(PCCtx *s_ctx, Vec rhs) {
   PetscFunctionReturn(0);
 }
 
-
 PetscErrorCode PC_init(PCCtx *s_ctx) {
   PetscFunctionBeginUser;
   PetscCall(PetscPrintf(PETSC_COMM_WORLD, "Initializing the PC context...\n"));
-  PetscInt grid;
+  PetscInt grid = 50;
   PetscCall(PetscOptionsGetInt(NULL, NULL, "-grid", &grid, NULL));
-  PetscInt mesh[DIM] = {50, 50, 50};
+  PetscInt mesh[DIM] = {grid, grid, grid};
   PetscScalar dom[DIM] = {1.0, 1.0, 1.0};
   PetscCheck((dom[0] > 0.0 && dom[1] > 0.0 && dom[2] > 0.0), PETSC_COMM_WORLD,
              PETSC_ERR_ARG_WRONG,
@@ -234,7 +234,6 @@ PetscErrorCode PC_init(PCCtx *s_ctx) {
   PetscCall(
       PetscPrintf(PETSC_COMM_WORLD, "en_lv2=%d\n", s_ctx->max_eigen_num_lv2));
 
-
   s_ctx->H_x = dom[0] / (double)mesh[0];
   s_ctx->H_y = dom[1] / (double)mesh[1];
   s_ctx->H_z = dom[2] / (double)mesh[2];
@@ -274,7 +273,6 @@ PetscErrorCode PC_init(PCCtx *s_ctx) {
   s_ctx->meas_face_zx = s_ctx->H_z * s_ctx->H_x;
   s_ctx->meas_face_xy = s_ctx->H_x * s_ctx->H_y;
   s_ctx->ms_bases_c_tmp = (Vec *)malloc(s_ctx->max_eigen_num_lv1 * sizeof(Vec));
-
 
   PetscInt proc_nx, proc_ny, proc_nz;
   PetscCall(DMDAGetCorners(s_ctx->dm, NULL, NULL, NULL, &proc_nx, &proc_ny,
