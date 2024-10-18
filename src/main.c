@@ -18,7 +18,6 @@
 #include <petscviewerhdf5.h>
 #include <slepceps.h>
 #include <time.h>
-
 #include "system.h"
 
 int main(int argc, char **argv) {
@@ -48,8 +47,10 @@ int main(int argc, char **argv) {
   PetscCall(MatPartitioningSetFromOptions(part));
   PetscCall(MatPartitioningApply(part, &is));
   PetscCall(MatPartitioningDestroy(&part));
+  PetscCall(PetscPrintf(PETSC_COMM_WORLD, "Displaying MPI process for local nodes\n"));
   PetscCall(ISView(is, PETSC_VIEWER_STDOUT_WORLD));
   PetscCall(ISPartitioningToNumbering(is, &isg));
+  PetscCall(PetscPrintf(PETSC_COMM_WORLD, "Displaying global node numbers for local nodes\n"));
   PetscCall(ISView(isg, PETSC_VIEWER_STDOUT_WORLD));
   PetscCall(AOCreateBasicIS(isg, NULL, &ao));
   PetscCall(AOView(ao, PETSC_VIEWER_STDOUT_WORLD));
@@ -60,6 +61,7 @@ int main(int argc, char **argv) {
   PetscCall(PetscPrintf(PETSC_COMM_WORLD, "Size of ISG: %d\n", size));
 
   PetscCall(PetscPrintf(PETSC_COMM_WORLD, "Finished partitioning!\n"));
+
 
 
   PetscCall(KSPCreate(PETSC_COMM_WORLD, &ksp));
